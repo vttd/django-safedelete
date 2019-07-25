@@ -161,12 +161,12 @@ class SafeDeleteModel(models.Model):
                 self.delete(force_policy=HARD_DELETE, **kwargs)
 
         elif current_policy == SOFT_DELETE_CASCADE:
-            # Soft-delete on related objects before
+            # soft-delete the object before related
+            self.delete(force_policy=SOFT_DELETE, **kwargs)
+            # Soft-delete related objects
             for related in related_objects(self):
                 if is_safedelete_cls(related.__class__) and not related.deleted:
                     related.delete(force_policy=SOFT_DELETE, **kwargs)
-            # soft-delete the object
-            self.delete(force_policy=SOFT_DELETE, **kwargs)
 
     @classmethod
     def has_unique_fields(cls):
