@@ -2,7 +2,7 @@ from django.db import models
 from django.test import TestCase
 from safedelete import SOFT_DELETE_CASCADE, SOFT_DELETE
 from safedelete.models import SafeDeleteModel
-from safedelete.tests.models import Article, Author, Category
+from safedelete.tests.models import Article, Author, Category, Thing, Stuff
 
 
 try:
@@ -58,6 +58,14 @@ class SimpleTest(TestCase):
         self.press = (
             Press.objects.create(name='press 0', article=self.articles[2])
         )
+
+        self.thing = Thing.objects.create()
+        self.stuff = Stuff.objects.create(thing=self.thing)
+
+    def test_soft_delete_cascade_sets_null(self):
+        self.thing.delete(force_policy=SOFT_DELETE_CASCADE)
+        self.assertEqual(Thing.objects.count(), 0)
+        self.assertEqual(self.stuff.thing, None)
 
     def test_soft_delete_cascade(self):
         self.assertEqual(Author.objects.count(), 3)

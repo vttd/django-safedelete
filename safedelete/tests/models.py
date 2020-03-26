@@ -1,8 +1,18 @@
 from django.db import models
 from safedelete import (DELETED_VISIBLE_BY_PK, HARD_DELETE,
-                        HARD_DELETE_NOCASCADE, SOFT_DELETE)
+                        HARD_DELETE_NOCASCADE, SOFT_DELETE, SOFT_DELETE_CASCADE)
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
+
+
+class Thing(SafeDeleteModel):
+    _safedelete_policy = SOFT_DELETE_CASCADE
+
+
+class Stuff(SafeDeleteModel):
+    _safedelete_policy = SOFT_DELETE_CASCADE
+
+    thing = models.ForeignKey(Thing, null=True, on_delete=models.SET_NULL)
 
 
 class Author(SafeDeleteModel):
