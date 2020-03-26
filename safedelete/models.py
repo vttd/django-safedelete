@@ -140,6 +140,18 @@ class SafeDeleteModel(models.Model):
             # Only soft-delete the object, marking it as deleted.
             self.deleted = timezone.now()
             using = kwargs.get('using') or router.db_for_write(self.__class__, instance=self)
+
+            # get all the related objects for self
+            for obj in self._meta.related_objects:
+                # if its on_delete is SET_NULL, we need to set it to null ourselves
+                if obj.on_delete == models.SET_NULL:
+                    # get the related model and loop over all instances
+                    model = obj.related_model
+                    for instance in model.objects.all():
+                        # update the field using the field name form the ManyToOneRel object
+                        setattr(instance, obj.field.name, None)
+                        instance.save()
+
             # send pre_softdelete signal
             pre_softdelete.send(sender=self.__class__, instance=self, using=using)
             super(SafeDeleteModel, self).save(**kwargs)

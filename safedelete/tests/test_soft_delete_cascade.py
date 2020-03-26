@@ -64,6 +64,7 @@ class SimpleTest(TestCase):
 
     def test_soft_delete_cascade_sets_null(self):
         self.thing.delete(force_policy=SOFT_DELETE_CASCADE)
+        self.stuff.refresh_from_db()
         self.assertEqual(Thing.objects.count(), 0)
         self.assertEqual(self.stuff.thing, None)
 
